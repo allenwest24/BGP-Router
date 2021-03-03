@@ -19,17 +19,21 @@ This program acts like a router. When router is executed, it opens several Unix 
 - Coalesces forwarding table entried for networks that are adhacent and on the same port.
 - Maintains a serialized routing table, relationships table, update announcement table, and open sockets tables.
 
-## Demo This Router
+## Demo This Router:
+- Download this repository on your own system.
+- cd into this directory on your own system.
+- Call "./sim all" to run all the tests provided.
+- Inspect the tests in the ./tests folder and see what kind of json inputs there are.
 
 ## High-Level Approach:
 
 ### Milestone:
-- Before writing any code we took a look at the test cases. This was primarily to familiarize ourselves with what kind of inputs we would be dealing with.
+- Before writing any code we took a look at some test cases. This was primarily to familiarize ourselves with what kind of inputs we would be dealing with.
 - We essentially created a make-shift switch to handle each type of packet that could be recieved, and passed on the packet with the srcif it came from.
 - First packet-specfic implementation was for update. We based the routing table on what would information would be necessary upon a "dump" request. We fullfilled the 3 requirements for an update: saving a copy to self.updates, updating the routing table in self.routes, and sending the update message along to neighboring routers according to who sent the packet. We did this by cross-referencing the self.relations table.
 - From here, we handled the second packet-specific type, data packets. These ones need to be sent through our router to our route (right now we assumed one option for each data packet.). 
-- The third packet-specific case we had to handle was the "dump" packets, where we had to dump the state of our routing table. for this one, we just read each key value in the self.routes table into an array and put it into the MESG portion of a dump packet and sent it back where it came from.
-- Milestone 1 completed.
+- The third packet-specific case we had to handle was the "dump" packets, where we had to dump the state of our routing table. For this one, we just read each key value in the self.routes table into an array and put it into the MESG portion of a dump packet and sent it back where it came from.
+- Milestone 1 completed: We could now start up a Router incident, open multiple sockets, and handle Update, Data, and Dump packets.
 
 ### Post-Milestone:
 - The first step we took after completing the level-1 tests was implement the rules needed to pass the level-2 tests. At this point, we found it easier to re-implement self.routes and self.updates as dicts instead of arrays like we had been doing.
@@ -44,20 +48,11 @@ This program acts like a router. When router is executed, it opens several Unix 
 - After getting our aggregate and coalesce methods working we attempted to decoalesce, and although we were able to separate and repopulate the table, we were unable to re-aggregate valid entries.
 
 ## Challenges:
-
-### Milestone:
-- The first massive challenge was getting comfortable with the starter code. This was very daunting and had parts that we were uncomfortable with, such as the select.select() portion of the code. To get around this, we over-used print statemetns and read the code until we were comfortable to tackle the first test.
-- Another challenge in this assignment was the lack of specificity in the project description. A lot of the requirements for this assignment were discovered through trial and error and this took quite a bit of time.
-- Figuring out how to send packets (and where) was tricky. We eventually figure our that we sent to the open sockets we were connected to and send them with our address listed as the #.#.#.1 version of whoever sent us the packet.
-- After understanding how to send things, the rest of the level-1 tests were cake.
-
-### Post-Milestone:
 - A major challenge we faced was in our previous implementation of self.routes and self.updates as arrays. We had to go back and re-instate them as structs. This was a mistake on our parts an took a minute to correct.
 - Also, when implementing the 5 rules we found significant troubles in how we paired key values to the different routes and update packages. Once we settled on a peer->network structure for the key, it was smooth sailing. Previously, routes were getting overwritten but now they would no longer be.
 - Figuring out the ip->binary was a little tricky but we took the approach of separating by the '.'s and comparing individual sections as binary.
 - A major confusion was about what was classified as neighboring IPs and once we figured out that they had to have the same netmask, the rest was fairly easy.
 - Another hard part in the aggregate method was the fact that once two parts were aggregated, they could also possibly be aggregated further, so we had to add an additional check to see if it worked and if there was any follow-on action needed.
-- Finally, the hardest part, and the part we were unable to solve: de-aggregate. We were able to remove the entry and repopulate the table with all update messages we had saved, but found difficulty re-aggregating them due to the way we had been redoing netmasks. We spent around 10 hours on this and due to other priorities had to foreit these points.
 
 ## Testing:
-Testing for this project was largely handles through the tests provided to us from the professor. If things were not working, we would consult the error messages and try again. A massive portion of testing was through print statements everywhere. Checking if the routing table consistently looked how we wanted it to look was a major challenge so this is how we tested this. Other than that, we mainly just used the provided tests and made sure previous tests were not broken by new features at the end of each level of tests.
+Testing for this project was largely handles through the tests in the ./tests folder. If things were not working, we would consult the error messages and try again. A massive portion of testing was through print statements everywhere. Checking if the routing table consistently looked how we wanted it to look was a major challenge so this is how we tested this. Other than that, we mainly just used the provided tests and made sure previous tests were not broken by new features at the end of each level of tests.
